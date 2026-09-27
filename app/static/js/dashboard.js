@@ -311,6 +311,19 @@ let webBleDevice = null;
 let webBleChar = null;
 
 async function connectViaWebBluetooth() {
+  // 1. Check if running inside our Native Android Companion APK
+  if (window.AndroidScooter && typeof window.AndroidScooter.connectScooter === "function") {
+    console.log("Triggering Native Android BLE connection via APK bridge...");
+    const topStatus = document.getElementById("top-status-pill");
+    if (topStatus) {
+      topStatus.className = "status-pill offline";
+      topStatus.innerHTML = '<span class="status-dot"></span><span>Connecting BLE...</span>';
+    }
+    window.AndroidScooter.connectScooter("87:1A:44:60:00:28");
+    return;
+  }
+
+  // 2. Otherwise fallback to Chrome Web Bluetooth
   if (!navigator.bluetooth) {
     alert("Web Bluetooth is not supported on this browser.\nPlease open this dashboard in Google Chrome on your Android phone.");
     return;
@@ -389,4 +402,29 @@ function onWebBleDisconnected() {
   const alertBanner = document.getElementById("disconnected-alert");
   if (alertBanner) alertBanner.style.display = "block";
 }
+
+// Global functions invoked from Android Native WebView Bridge
+window.onNativeBleState = function(connected, deviceName) {
+  console.log("Native BLE connection status:", connected, deviceName);
+  const topStatus = document.getElementById("top-status-pill");
+  if (topStatus) {
+    topStatus.className = connected ? "status-pill online" : "status-pill offline";
+    topStatus.innerHTML = '<span class="status-dot"></span><span>' + (connected ? ('Phone BLE: ' + (deviceName || 'OLAS1')) : 'Disconnected') + '</span>';
+  }
+  const alertBanner = document.getElementById("disconnected-alert");
+  if (alertBanner) alertBanner.style.display = connected ? "none" : "block";
+};
+
+window.feedRawPacket = function(hex) {
+  fetch("/api/scooter/feed_packet", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      hex: hex,
+      name: "OLAS1 (Phone BLE)",
+      address: "87:1A:44:60:00:28"
+    })
+  }).catch(e => console.debug("Feed packet err:", e));
+};
+
 
