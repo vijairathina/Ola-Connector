@@ -13,30 +13,38 @@
   </button>
 </div>
 
+<!-- PERMANENT QUICK CONNECT ACTION BAR -->
+<div class="card" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.25rem; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(0, 242, 254, 0.25); border-radius: var(--radius-md);">
+  <div style="display: flex; align-items: center; gap: 0.75rem;">
+    <div style="font-size: 1.6rem;">🛵</div>
+    <div>
+      <div style="font-weight: 700; font-size: 1rem; color: #fff;">Ola Scooter BLE Link</div>
+      <div style="font-size: 0.8rem; color: var(--text-secondary);">Direct Bluetooth connection from phone or host</div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+    <button class="btn btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.9rem; background: linear-gradient(135deg, #00f2fe, #4facfe); color: #000; font-weight: 700; cursor: pointer; box-shadow: 0 0 15px rgba(0,242,254,0.3);" onclick="connectViaWebBluetooth()">
+      📲 Connect via Phone Bluetooth
+    </button>
+    <button class="btn btn-secondary" style="padding: 0.6rem 1rem; font-size: 0.85rem;" onclick="openScanModal()">
+      📡 Scan Nearby
+    </button>
+  </div>
+</div>
+
 <!-- ERROR / DISCONNECTED CALLOUT -->
-<div id="disconnected-alert" class="card" style="display: none; border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.05); margin-bottom: 1.5rem;">
+<div id="disconnected-alert" class="card" style="display: block; border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.05); margin-bottom: 1.5rem;">
   <div style="display: flex; gap: 1rem; align-items: flex-start;">
     <div style="font-size: 1.75rem;">⚠️</div>
     <div style="flex: 1;">
-      <h4 style="font-size: 1.1rem; color: var(--accent-rose); margin-bottom: 0.4rem;">Scooter Disconnected / Not Found</h4>
+      <h4 style="font-size: 1.1rem; color: var(--accent-rose); margin-bottom: 0.4rem;">Scooter Disconnected / Waiting for Connection</h4>
       <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;" id="disconnected-reason">
-        Make sure the scooter is within BLE range and awake.
+        Tap the bright cyan <strong>"Connect via Phone Bluetooth"</strong> button above to connect your phone directly to the scooter.
       </p>
       <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
-        <div>✓ Ensure Bluetooth is enabled on this device</div>
-        <div>✓ Scooter screen is ON (not in deep sleep)</div>
-        <div>✓ If connecting via phone, tap <strong>Connect via Phone Bluetooth</strong> below</div>
-      </div>
-      <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.75rem;">
-        <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: linear-gradient(135deg, #00f2fe, #4facfe); color: #000; font-weight: 700;" onclick="connectViaWebBluetooth()">
-          📲 Connect via Phone Bluetooth
-        </button>
-        <button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="openScanModal()">
-          📡 Host BLE Scan
-        </button>
-        <button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="manualConnect()">
-          🔄 Retry Host Link
-        </button>
+        <div>✓ Ensure Bluetooth is turned ON on your phone</div>
+        <div>✓ Scooter screen is awake (press power button)</div>
+        <div>✓ The official Ola app is closed (not holding the connection)</div>
       </div>
     </div>
   </div>
