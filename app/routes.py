@@ -238,7 +238,7 @@ def feed_telemetry_packet():
     bt = current_app.config["BLUETOOTH"]
     db = current_app.config["DB"]
     data = request.get_json() or {}
-    hex_str = data.get("hex")
+    hex_str = (data.get("hex") or "").strip().replace(" ", "").replace(":", "")
     if not hex_str:
         return jsonify({"success": False, "error": "No hex payload provided"}), 400
     try:

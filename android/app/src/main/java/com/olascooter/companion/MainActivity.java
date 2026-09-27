@@ -126,8 +126,13 @@ public class MainActivity extends Activity {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 final String name = gatt.getDevice().getName();
                 notifyWeb("onNativeBleState(true, '" + (name != null ? name : "OLAS1") + "');");
-                Log.i(TAG, "Discovering services...");
-                gatt.discoverServices();
+                // Delay service discovery to match nRF Connect timing (ensuring ACL connection settles)
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                    if (bluetoothGatt != null) {
+                        Log.i(TAG, "Discovering services after ACL settle delay...");
+                        bluetoothGatt.discoverServices();
+                    }
+                }, 1200);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 notifyWeb("onNativeBleState(false, '');");
             }
@@ -157,7 +162,15 @@ public class MainActivity extends Activity {
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            byte[] value = characteristic.getValue();
+            handleIncomingBytes(characteristic.getValue());
+        }
+
+        @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value) {
+            handleIncomingBytes(value);
+        }
+
+        private void handleIncomingBytes(byte[] value) {
             if (value != null && value.length > 0) {
                 StringBuilder sb = new StringBuilder();
                 for (byte b : value) {
