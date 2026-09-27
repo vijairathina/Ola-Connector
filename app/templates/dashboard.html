@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Ola Scooter Telemetry{% endblock %}
+
+{% block content %}
+<!-- SIMULATION BANNER IF ACTIVE -->
+<div id="sim-banner" style="display: none; background: rgba(0, 242, 254, 0.1); border: 1px dashed var(--accent-cyan); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+  <span style="font-size: 0.9rem; color: var(--accent-cyan); font-weight: 500;">
+    🧪 <strong>EV Simulator Active</strong> — Generating simulated telemetry stream for UI development.
+  </span>
+  <button class="btn btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;" onclick="toggleSimCharging()">
+    ⚡ Toggle Simulated Charging
+  </button>
+</div>
+
+<!-- ERROR / DISCONNECTED CALLOUT -->
+<div id="disconnected-alert" class="card" style="display: none; border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.05); margin-bottom: 1.5rem;">
+  <div style="display: flex; gap: 1rem; align-items: flex-start;">
+    <div style="font-size: 1.75rem;">⚠️</div>
+    <div style="flex: 1;">
+      <h4 style="font-size: 1.1rem; color: var(--accent-rose); margin-bottom: 0.4rem;">Scooter Disconnected / Not Found</h4>
+      <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;" id="disconnected-reason">
+        Make sure the scooter is within BLE range and awake.
+      </p>
+      <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+        <div>✓ Ensure Bluetooth is enabled on this device</div>
+        <div>✓ Scooter screen is ON (not in deep sleep)</div>
+        <div>✓ If connecting via phone, tap <strong>Connect via Phone Bluetooth</strong> below</div>
+      </div>
+      <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.75rem;">
+        <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: linear-gradient(135deg, #00f2fe, #4facfe); color: #000; font-weight: 700;" onclick="connectViaWebBluetooth()">
+          📲 Connect via Phone Bluetooth
+        </button>
+        <button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="openScanModal()">
+          📡 Host BLE Scan
+        </button>
+        <button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="manualConnect()">
+          🔄 Retry Host Link
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <!-- 1. HERO BATTERY CARD -->
+  <div class="card card-hero" id="battery-hero-card">
+    <div class="card-header">
+      <div class="card-title">
+        <span>🔋</span>
+        <span>High-Voltage Battery</span>
+      </div>
+      <span class="status-pill" id="charging-indicator-pill" style="font-size: 0.75rem;">
+        <span class="status-dot"></span>
+        <span id="charging-pill-text">Discharging</span>
+      </span>
+    </div>
+
+    <div class="battery-hero">
+      <div class="battery-circle-wrap">
+        <svg class="battery-svg" viewBox="0 0 220 220">
+          <circle class="battery-circle-bg" cx="110" cy="110" r="95"></circle>
+          <circle class="battery-circle-bar" id="battery-dial" cx="110" cy="110" r="95"></circle>
+        </svg>
+        <div class="battery-circle-content">
+          <div class="battery-percentage" id="battery-val">--%</div>
+          <div class="battery-subtext">State of Charge</div>
+        </div>
+      </div>
+
+      <div class="range-display">
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.08em; margin-bottom: 0.2rem;">
+          Estimated Range
+        </div>
+        <div>
+          <span class="range-value" id="range-val">--</span>
+          <span class="range-unit">km</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- VEHICLE ACTION BUTTONS -->
+    <div class="controls-bar">
+      <button class="btn btn-lock" id="btn-lock" onclick="promptLockCommand()">
+        <span>🔒</span>
+        <span>Lock Scooter</span>
+      </button>
+      <button class="btn btn-unlock" id="btn-unlock" onclick="promptUnlockCommand()">
+        <span>🔓</span>
+        <span>Unlock Scooter</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. SIDE COLUMN CARDS -->
+  <div class="card-side">
+    <!-- CHARGING CARD -->
+    <div class="card" id="charging-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>⚡</span>
+          <span>Charging System</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: var(--text-secondary); font-size: 0.9rem;">Charging Plug</span>
+          <span style="font-weight: 700; font-size: 1rem;" id="charging-plug-status">Unavailable</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: var(--text-secondary); font-size: 0.9rem;">Est. Full Charge</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 1rem;" id="charging-time-val">--:--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOCK / SECURITY CARD -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🛡️</span>
+          <span>Security & Steering</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: var(--text-secondary); font-size: 0.9rem;">Lock Status</span>
+          <span class="status-pill" id="lock-status-pill">
+            <span id="lock-status-text">UNKNOWN</span>
+          </span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: var(--text-secondary); font-size: 0.9rem;">Steering Handle</span>
+          <span style="font-weight: 600; font-size: 0.9rem;" id="steering-handle-text">--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLUETOOTH LINK CARD -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📶</span>
+          <span>Bluetooth Link</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: var(--text-secondary); font-size: 0.9rem;">Device</span>
+          <span style="font-weight: 600; font-size: 0.9rem;" id="ble-name">OLAS1</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: var(--text-secondary); font-size: 0.9rem;">Address</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;" id="ble-mac">--:--:--:--:--:--</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: var(--text-secondary); font-size: 0.9rem;">Signal RSSI</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent-cyan);" id="ble-rssi">-- dBm</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+          <span>Last Update:</span>
+          <span id="ble-last-seen">--:--:--</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TELEMETRY STATS TILES -->
+  <div class="stat-tile card-stat">
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Odometer</div>
+      <div class="stat-value" id="stat-odometer">-- <span style="font-size: 0.9rem; color: var(--text-muted);">km</span></div>
+    </div>
+    <div class="stat-icon">🛣️</div>
+  </div>
+
+  <div class="stat-tile card-stat">
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Driving Mode</div>
+      <div class="stat-value" id="stat-drive-mode" style="color: var(--accent-emerald);">NORMAL</div>
+    </div>
+    <div class="stat-icon">⚡</div>
+  </div>
+
+  <div class="stat-tile card-stat">
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Side Stand</div>
+      <div class="stat-value" id="stat-side-stand">--</div>
+    </div>
+    <div class="stat-icon">🛵</div>
+  </div>
+</div>
+
+<!-- BLE SCANNER MODAL -->
+<div class="modal-overlay" id="scan-modal">
+  <div class="modal-card" style="max-width: 550px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3 style="font-size: 1.25rem;">Nearby BLE Devices</h3>
+      <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="closeScanModal()">✕</button>
+    </div>
+    <div id="scan-loading" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">📡</div>
+      Scanning for nearby Bluetooth devices...
+    </div>
+    <div id="scan-results" style="max-height: 320px; overflow-y: auto; display: none; display: flex; flex-direction: column; gap: 0.5rem;"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

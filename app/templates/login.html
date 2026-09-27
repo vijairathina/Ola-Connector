@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Ola Scooter Controller</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body style="justify-content: center; align-items: center;">
+  <div class="card" style="width: 100%; max-width: 400px; padding: 2.5rem 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <div class="brand-icon" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem;">
+        ⚡
+      </div>
+      <h2 style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em;">EV Cockpit Login</h2>
+      <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.25rem;">
+        Local Bluetooth vehicle companion
+      </p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div style="margin-bottom: 1.25rem;">
+          {% for category, message in messages %}
+            <div style="background: rgba(244, 63, 94, 0.1); border-left: 3px solid var(--accent-rose); padding: 0.6rem 0.85rem; font-size: 0.85rem; color: #fecdd3; border-radius: var(--radius-sm);">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input type="text" id="username" name="username" class="form-input" placeholder="admin" required autofocus value="admin">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.75rem;">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-input" placeholder="admin123" required value="admin123">
+        <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.4rem;">
+          Default credentials: <code>admin</code> / <code>admin123</code>
+        </small>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;">
+        Sign In to Vehicle Cockpit
+      </button>
+    </form>
+  </div>
+</body>
+</html>

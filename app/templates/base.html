@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>{% block title %}Ola Scooter Telemetry{% endblock %}</title>
+  <meta name="description" content="Lightweight local Bluetooth companion dashboard for Ola electric scooters">
+  <meta name="theme-color" content="#00f2fe">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/icon-192.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+  <!-- NAV HEADER -->
+  <header class="navbar">
+    <a href="{{ url_for('web.dashboard') }}" class="brand">
+      <div class="brand-icon">⚡</div>
+      <span>EV Cockpit</span>
+    </a>
+
+    {% if session.get('user') %}
+    <nav>
+      <ul class="nav-links">
+        <li>
+          <a href="{{ url_for('web.dashboard') }}" class="nav-link {% if request.endpoint == 'web.dashboard' %}active{% endif %}" id="nav-dashboard">
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('web.history') }}" class="nav-link {% if request.endpoint == 'web.history' %}active{% endif %}" id="nav-history">
+            History
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('web.settings') }}" class="nav-link {% if request.endpoint == 'web.settings' %}active{% endif %}" id="nav-settings">
+            Settings
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="nav-actions">
+      <div class="status-pill offline" id="top-status-pill">
+        <div class="status-dot"></div>
+        <span id="top-status-text">OFFLINE</span>
+      </div>
+
+      <a href="{{ url_for('web.logout') }}" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.85rem;" title="Logout ({{ session.get('user') }})">
+        Logout
+      </a>
+    </div>
+    {% endif %}
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div style="margin-bottom: 1.5rem;">
+          {% for category, message in messages %}
+            <div class="stat-tile" style="border-left: 4px solid var(--accent-{% if category == 'danger' %}rose{% elif category == 'success' %}emerald{% else %}blue{% endif %}); margin-bottom: 0.5rem; padding: 0.75rem 1rem;">
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- CONFIRMATION & PIN MODAL (FOR VEHICLE COMMANDS) -->
+  <div class="modal-overlay" id="command-modal">
+    <div class="modal-card">
+      <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;" id="modal-title">Confirm Vehicle Command</h3>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.25rem;" id="modal-description">
+        Are you sure you want to send this command to the vehicle?
+      </p>
+
+      <div class="form-group" id="modal-pin-group">
+        <label class="form-label" for="modal-pin">Security PIN (Default: 1234)</label>
+        <input type="password" id="modal-pin" class="form-input" placeholder="Enter vehicle PIN" maxlength="6" inputmode="numeric">
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeCommandModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" id="modal-confirm-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js')
+          .then(reg => console.log('PWA Service Worker registered:', reg.scope))
+          .catch(err => console.debug('Service Worker reg failed:', err));
+      });
+    }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

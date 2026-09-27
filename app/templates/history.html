@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}History & Analytics | Ola Scooter{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <div>
+    <h2 style="font-size: 1.5rem; font-weight: 700;">Telemetry & Charge History</h2>
+    <p style="color: var(--text-secondary); font-size: 0.9rem;">Historical battery discharge, charging cycles, and command audit logs</p>
+  </div>
+  <div style="display: flex; gap: 0.75rem;">
+    <a href="/api/history/export_csv" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+      📥 Export CSV
+    </a>
+    <button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; color: var(--accent-rose);" onclick="confirmClearHistory()">
+      🗑️ Clear History
+    </button>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <!-- BATTERY HISTORY CHART -->
+  <div class="card card-full">
+    <div class="card-header">
+      <div class="card-title">
+        <span>📈</span>
+        <span>Battery % & Range Trend</span>
+      </div>
+      <span style="font-size: 0.85rem; color: var(--text-muted);">Last 50 data points</span>
+    </div>
+
+    <!-- Responsive SVG Chart Container -->
+    <div id="chart-container" style="width: 100%; height: 260px; position: relative;">
+      <svg id="battery-chart" viewBox="0 0 800 240" style="width: 100%; height: 100%; overflow: visible;"></svg>
+    </div>
+  </div>
+
+  <!-- CHARGING SESSIONS -->
+  <div class="card card-hero" style="min-height: auto;">
+    <div class="card-header">
+      <div class="card-title">
+        <span>⚡</span>
+        <span>Recent Charging Sessions</span>
+      </div>
+    </div>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;" id="charging-table">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary);">
+            <th style="padding: 0.75rem 0.5rem;">Start Time</th>
+            <th style="padding: 0.75rem 0.5rem;">End Time</th>
+            <th style="padding: 0.75rem 0.5rem;">Start %</th>
+            <th style="padding: 0.75rem 0.5rem;">End %</th>
+            <th style="padding: 0.75rem 0.5rem;">Duration</th>
+          </tr>
+        </thead>
+        <tbody id="charging-tbody">
+          <tr>
+            <td colspan="5" style="padding: 1.5rem; text-align: center; color: var(--text-muted);">Loading charging sessions...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- COMMAND AUDIT LOG -->
+  <div class="card card-side">
+    <div class="card-header">
+      <div class="card-title">
+        <span>📜</span>
+        <span>Command Audit Log</span>
+      </div>
+    </div>
+    <div id="command-log-list" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem;">
+      <div style="text-align: center; padding: 1.5rem; color: var(--text-muted);">Loading audit logs...</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}

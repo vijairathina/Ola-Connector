@@ -1,0 +1,24 @@
+{
+  "name": "Ola Scooter Controller",
+  "short_name": "Ola Scooter",
+  "description": "Smart Bluetooth Dashboard & Telemetry for Ola Electric Scooter",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#00f2fe",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/img/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/img/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19" />
+      <stop offset="100%" stop-color="#151d30" />
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="100%" stop-color="#4facfe" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#bg)" stroke="url(#glow)" stroke-width="8"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="url(#glow)" stroke-width="14" stroke-dasharray="800 200"/>
+  <!-- Scooter / EV Lightning Bolt Icon -->
+  <path d="M280 120 L180 270 L250 270 L232 392 L332 242 L262 242 Z" fill="url(#glow)" filter="drop-shadow(0 0 16px rgba(0,242,254,0.6))"/>
+</svg>

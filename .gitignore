@@ -1,0 +1,24 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+
+# Large APK and binary analysis dumps
+*.apk
+*.apk+
+analysis/base.apk
+analysis/*.dex
+analysis/dex_strings.txt
+
+# Android Build artifacts
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+
+# Logs and secrets
+*.log
+.DS_Store
+Thumbs.db
