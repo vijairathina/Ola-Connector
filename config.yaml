@@ -6,8 +6,8 @@ server:
 
 bluetooth:
   device_address: "87:1A:44:60:00:28"
-  auto_connect: true
-  reconnect: true
+  auto_connect: false
+  reconnect: false
   reconnect_delay: 5
   scan_timeout: 10
   rssi_threshold: -85
