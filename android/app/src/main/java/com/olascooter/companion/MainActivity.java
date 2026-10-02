@@ -29,7 +29,7 @@ public class MainActivity extends Activity {
     private BluetoothGatt bluetoothGatt;
 
     private static final int PERMISSION_REQUEST_CODE = 1001;
-    private static final String DEFAULT_URL = "http://192.168.0.12:5000/dashboard";
+    private static final String DEFAULT_URL = "http://192.168.0.6:5000/dashboard";
     private static final String DEFAULT_MAC = "87:1A:44:60:00:28";
 
     // Custom Nordic UART / Ola Scooter UUIDs

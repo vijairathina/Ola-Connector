@@ -237,9 +237,10 @@ def disconnect_scooter():
 def feed_telemetry_packet():
     bt = current_app.config["BLUETOOTH"]
     db = current_app.config["DB"]
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     hex_str = (data.get("hex") or "").strip().replace(" ", "").replace(":", "")
     if not hex_str:
+        logger.warning(f"feed_packet: missing or empty hex string, data={data}")
         return jsonify({"success": False, "error": "No hex payload provided"}), 400
     try:
         raw_bytes = bytes.fromhex(hex_str)
@@ -247,8 +248,10 @@ def feed_telemetry_packet():
         addr = data.get("address", "87:1A:44:60:00:28")
         bt.ingest_telemetry_bytes(raw_bytes, device_name=name, address=addr)
         db.save_status(bt.status)
+        logger.info(f"Successfully ingested telemetry packet: {hex_str[:20]}... (Len: {len(raw_bytes)})")
         return jsonify({"success": True})
     except Exception as e:
+        logger.error(f"feed_packet parsing error: {e}, hex={hex_str}")
         return jsonify({"success": False, "error": str(e)}), 400
 
 # -------------------------------------------------------------
